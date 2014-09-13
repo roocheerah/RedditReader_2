@@ -8,8 +8,7 @@
         android:defaultValue="@string/pref_topic_default"
         android:entryValues="@array/pref_topics_values"
         android:entries="@array/pref_topics_options"
-        android:inputType="text"
-        android:singleLine="true" />
+        android:inputType="text" />
 
 
 </PreferenceScreen>
