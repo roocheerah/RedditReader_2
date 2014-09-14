@@ -1,70 +1,96 @@
 package com.ruchirakulkarni.redditreader;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
-/**
- * A {@link PreferenceActivity} that presents a set of application settings. On
- * handset devices, settings are presented as a single list. On tablets,
- * settings are split by category, with category headers shown to the left of
- * the list of settings.
- * <p>
- * See <a href="http://developer.android.com/design/patterns/settings.html">
- * Android Design: Settings</a> for design guidelines and the <a
- * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
- * API Guide</a> for more information on developing a Settings UI.
- */
-public class SettingsActivity extends PreferenceActivity
-        implements Preference.OnPreferenceChangeListener {
+import java.util.ArrayList;
+
+
+public class MainActivity extends ActionBarActivity {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add 'general' preferences, defined in the XML file
-        addPreferencesFromResource(R.xml.pref_general);
-
-        // For all preferences, attach an OnPreferenceChangeListener so the UI summary can be
-        // updated when the preference changes.
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_topic_key)));
+        setContentView(R.layout.activity_main);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new RedditPostType())
+                    .commit();
+        }
     }
 
-    /**
-     * Attaches a listener so the summary is always updated with the preference value.
-     * Also fires the listener once, to initialize the summary (so it shows up before the value
-     * is changed.)
-     */
-    private void bindPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(this);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
-    }
 
     @Override
-    public boolean onPreferenceChange(Preference preference, Object value) {
-        String stringValue = value.toString();
-
-        if (preference instanceof ListPreference) {
-            // For list preference, look up the correct display value in
-            // the preference's 'entries' list (since they have separate labels/values).
-            ListPreference listPreference = (ListPreference) preference;
-            int prefIndex = listPreference.findIndexOfValue(stringValue);
-            if (prefIndex >= 0) {
-                preference.setSummary(listPreference.getEntries()[prefIndex]);
-            }
-        } else {
-            // For other preferences, set the summary to the value's simple string representation.
-            preference.setSummary(stringValue);
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
-}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class RedditPostType extends Fragment {
+
+        public RedditPostType() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            ArrayList<String> types = new ArrayList<String>();
+            types.add("Hot");
+            types.add("New");
+            types.add("Rising");
+            types.add("Controversial");
+            types.add("Top");
+
+
+            final ArrayAdapter<String> subredditTypeAdapter = new ArrayAdapter<String>(
+                    getActivity(), R.layout.list_item_reddit_type, R.id.list_item_reddit_type_textview, types);
+
+            ListView listView = (ListView) rootView.findViewById(R.id.listview_type);
+            listView.setAdapter(subredditTypeAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+               @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int index, long l){
+                   Context context = getActivity();
+                   //you should replace this toast with an intent connected to the DetailActivity1.java class
+                   String post = subredditTypeAdapter.getItem(index);
+                   Intent intentToDetailActivity1 = new Intent(getActivity(), DetailActivity1.class)
+                           .putExtra(Intent.EXTRA_TEXT, post);
+                   startActivity(intentToDetailActivity1);
+               }
+            });
+
+                return rootView;
+            }
+        }
+    }
+
