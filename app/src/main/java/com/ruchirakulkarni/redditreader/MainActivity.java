@@ -70,9 +70,7 @@ public class MainActivity extends ActionBarActivity {
             types.add("Rising");
             types.add("Controversial");
             types.add("Top");
-            types.add("Gilded");
-            types.add("Wiki");
-            types.add("Promoted");
+
 
             final ArrayAdapter<String> subredditTypeAdapter = new ArrayAdapter<String>(
                     getActivity(), R.layout.list_item_reddit_type, R.id.list_item_reddit_type_textview, types);
@@ -88,14 +86,6 @@ public class MainActivity extends ActionBarActivity {
                    Intent intentToDetailActivity1 = new Intent(getActivity(), DetailActivity1.class)
                            .putExtra(Intent.EXTRA_TEXT, post);
                    startActivity(intentToDetailActivity1);
-
-                   //THIS IS THE CODE TO THE INITIAL TOAST WE MADE WHILE CHECKING THE ONITEMCLICKLISTENER
-
-//                   String toastContent = subredditTypeAdapter.getItem(index);
-//                   CharSequence text = toastContent + " has been clicked";
-//                   int duration = Toast.LENGTH_SHORT;
-//                   Toast toast = new Toast(getActivity());
-//                   toast.makeText(context, text, duration).show();
                }
             });
 
