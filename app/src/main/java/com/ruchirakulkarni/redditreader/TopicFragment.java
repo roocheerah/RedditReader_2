@@ -13,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,13 +76,15 @@ public class TopicFragment extends Fragment{
          return null;
     }
 
-    public class FetchTopicTask extends AsyncTask<Void, Void, Void> {
+    public class FetchTopicTask extends AsyncTask<Void, Void, String[]> {
+
+        private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
 
         public FetchTopicTask(Void... params){
 
         }
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected String[] doInBackground(Void... voids) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -118,7 +124,7 @@ public class TopicFragment extends Fragment{
                }
 
                 redditJsonStr = buffer.toString();
-                System.out.println(redditJsonStr);
+                Log.v(LOG_TAG, "Topic JSON String " + redditJsonStr);
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -135,8 +141,52 @@ public class TopicFragment extends Fragment{
                        Log.e("PlaceholderFragment", "Error closing stream", e);
                    }
                 }
+
+                try {
+                    return getSubRedditDataFromJSON(redditJsonStr);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getMessage(), e);
+                    e.printStackTrace();
+                }
                 return null;
             }
+        }
+
+        private String[] getSubRedditDataFromJSON(String redditJsonStr) throws JSONException{
+
+            //these are the names of the JSON objects that need to be extracted
+            final String R_AUTHOR = "author";
+            final String R_TITLE = "title";
+            final String R_PERMALINK = "permalink"; //the links to the comments on that article
+            final String R_URL = "url";
+            final String R_SUBREDDIT = "subreddit";
+            final String R_DATA = "data";
+            final String R_CHILDREN = "children";
+
+            String[] resultStr = new String[10];
+
+            JSONObject redditJson = new JSONObject(redditJsonStr);
+            JSONObject dataObject = (JSONObject)redditJson.get(R_DATA);
+            JSONArray children = (JSONArray)dataObject.get(R_CHILDREN);
+
+            for (int i = 0; i < 10 ; i++) {
+                JSONObject dummy = (JSONObject) children.get(i);
+                JSONObject data = (JSONObject) dummy.get(R_DATA);
+                JSONObject author = (JSONObject) data.get(R_AUTHOR);
+                JSONObject title = (JSONObject) data.get(R_TITLE);
+                JSONObject permalink = (JSONObject) data.get(R_PERMALINK);
+                JSONObject url = (JSONObject) data.get(R_URL);
+                JSONObject subreddit = (JSONObject) data.get(R_SUBREDDIT);
+
+                resultStr[i] = "Link: " + url.toString() + " author: " + author.toString() + "title: " + title.toString();
+
+            }
+
+            for (String s : resultStr){
+                Log.v(LOG_TAG, "TopicEntry " + s);
+            }
+
+            return null;
         }
     }
 }
