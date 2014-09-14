@@ -65,7 +65,7 @@ public class TopicFragment extends Fragment{
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String topic = prefs.getString(getString(R.string.pref_topic_key),
                 getString(R.string.pref_topic_default));
-        topicTask.execute();
+        topicTask.execute(topic);
     }
 
     @Override
@@ -89,6 +89,7 @@ public class TopicFragment extends Fragment{
 
              postTypeAdapter = new ArrayAdapter<String>(
                      getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
+
              ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
              listView.setAdapter(postTypeAdapter);
 
@@ -108,7 +109,7 @@ public class TopicFragment extends Fragment{
          return null;
     }
 
-    public class FetchTopicTask extends AsyncTask<Void, Void, String[]> {
+    public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
 
@@ -116,15 +117,21 @@ public class TopicFragment extends Fragment{
 
         }
         @Override
-        protected String[] doInBackground(Void... voids) {
+        protected String[] doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             //This will contain the raw JSON String response as a String
             String redditJsonStr = null;
+            String topic = params[0];
+
+            if(topic != null){
+                data = topic + "/" + data;
+            }
+
             try {
             //construct the url for the entry of the reddit API
-               String tempURL = "http://www.reddit.com/r/subreddit/" + data + "/.json";
+               String tempURL = "http://www.reddit.com/" + data + "/.json";
                System.out.println(tempURL);
                URL url = new URL(tempURL);
 
