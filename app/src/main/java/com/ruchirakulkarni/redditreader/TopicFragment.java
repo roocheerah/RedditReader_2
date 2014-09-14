@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -23,12 +24,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by ruchirakulkarni on 9/13/14.
  */
 public class TopicFragment extends Fragment{
 
+    private ArrayAdapter<String> postTypeAdapter;
     String data;
 
     public TopicFragment() {
@@ -68,8 +71,20 @@ public class TopicFragment extends Fragment{
          if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
              data = data.toLowerCase();
+             ArrayList<String> types = new ArrayList<String>();
+             types.add("Hot");
+             types.add("New");
+             types.add("Rising");
+             types.add("Controversial");
+             types.add("Top");
+             types.add("Gilded");
+             types.add("Wiki");
+             types.add("Promoted");
 
+             postTypeAdapter = new ArrayAdapter<String>(
+                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview,types);
              ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+             listView.setAdapter(postTypeAdapter);
 
              return rootView;
          }
@@ -178,7 +193,7 @@ public class TopicFragment extends Fragment{
                 String url = data.getString(R_URL);
                 String subreddit = data.getString(R_SUBREDDIT);
 
-                resultStr[i] = "Link: " + url + " author: " + author + "title: " + title;
+                resultStr[i] = "Title: " + title + " by " + author;
 
             }
 
@@ -187,6 +202,16 @@ public class TopicFragment extends Fragment{
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if(result != null){
+                postTypeAdapter.clear();
+                for(String post : result){
+                    postTypeAdapter.add(post);
+                }
+            }
         }
     }
 }
