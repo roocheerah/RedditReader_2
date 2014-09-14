@@ -166,24 +166,24 @@ public class TopicFragment extends Fragment{
             String[] resultStr = new String[10];
 
             JSONObject redditJson = new JSONObject(redditJsonStr);
-            JSONObject dataObject = (JSONObject)redditJson.get(R_DATA);
-            JSONArray children = (JSONArray)dataObject.get(R_CHILDREN);
+            JSONObject dataObject = redditJson.getJSONObject(R_DATA);
+            JSONArray children = dataObject.getJSONArray(R_CHILDREN);
 
             for (int i = 0; i < 10 ; i++) {
-                JSONObject dummy = (JSONObject) children.get(i);
-                JSONObject data = (JSONObject) dummy.get(R_DATA);
-                JSONObject author = (JSONObject) data.get(R_AUTHOR);
-                JSONObject title = (JSONObject) data.get(R_TITLE);
-                JSONObject permalink = (JSONObject) data.get(R_PERMALINK);
-                JSONObject url = (JSONObject) data.get(R_URL);
-                JSONObject subreddit = (JSONObject) data.get(R_SUBREDDIT);
+                JSONObject dummy = children.getJSONObject(i);
+                JSONObject data = dummy.getJSONObject(R_DATA);
+                String author = data.getString(R_AUTHOR);
+                String title = data.getString(R_TITLE);
+                String permalink = data.getString(R_PERMALINK);
+                String url = data.getString(R_URL);
+                String subreddit = data.getString(R_SUBREDDIT);
 
-                resultStr[i] = "Link: " + url.toString() + " author: " + author.toString() + "title: " + title.toString();
+                resultStr[i] = "Link: " + url + " author: " + author + "title: " + title;
 
             }
 
             for (String s : resultStr){
-                Log.v(LOG_TAG, "TopicEntry " + s);
+                Log.v(LOG_TAG, "Topic Entry " + s);
             }
 
             return null;
