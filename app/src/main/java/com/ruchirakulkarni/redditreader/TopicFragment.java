@@ -1,8 +1,10 @@
 package com.ruchirakulkarni.redditreader;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,7 +27,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
+import android.widget.AdapterView;
 /**
  * Created by ruchirakulkarni on 9/13/14.
  */
@@ -52,11 +54,24 @@ public class TopicFragment extends Fragment{
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchTopicTask topicTask = new FetchTopicTask();
-            topicTask.execute();
+            updatePosts();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updatePosts() {
+        FetchTopicTask topicTask = new FetchTopicTask();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String topic = prefs.getString(getString(R.string.pref_topic_key),
+                getString(R.string.pref_topic_default));
+        topicTask.execute();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updatePosts();
     }
 
     @Override
@@ -71,20 +86,22 @@ public class TopicFragment extends Fragment{
          if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
              data = data.toLowerCase();
-             ArrayList<String> types = new ArrayList<String>();
-             types.add("Hot");
-             types.add("New");
-             types.add("Rising");
-             types.add("Controversial");
-             types.add("Top");
-             types.add("Gilded");
-             types.add("Wiki");
-             types.add("Promoted");
 
              postTypeAdapter = new ArrayAdapter<String>(
-                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview,types);
+                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
              ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
              listView.setAdapter(postTypeAdapter);
+
+             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                 @Override
+                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                     String subReddit = postTypeAdapter.getItem(position);
+                     Intent intent = new Intent(getActivity(), DetailActivity2.class)
+                             .putExtra(Intent.EXTRA_TEXT, subReddit);
+                     startActivity(intent);
+                 }
+             });
 
              return rootView;
          }
