@@ -4,14 +4,14 @@
     <string name="app_name">RedditReader</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_detail_activity1">DetailActivity1</string>
+    <string name="title_activity_detail_activity1">SubReddits</string>
 
     <!-- Menu label to fetch updated weather info from the server -->
     <string name="action_refresh" translatable="false">Refresh</string>
     <string name="title_activity_detail">Details</string>
     <string name="pref_topic_label">Topics</string>
     <string name="pref_topic_key">topic</string>
-    <string name="pref_topic_default"></string>
+    <string name="pref_topic_default">all</string>
 
     <!-- This is the list of options that show up in settings -->
     <string name="pref_topics_label_announcements">Announcements</string>
@@ -112,6 +112,6 @@
     <string name="pref_topics_values_videos">videos</string>
     <string name="pref_topics_values_worldnews">worldnews</string>
     <string name="pref_topics_values_writingprompts">writingprompts</string>
-    <string name="title_activity_detail_activity2">DetailActivity2</string>
+    <string name="title_activity_detail_activity2">Post</string>
 
 </resources>
