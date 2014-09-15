@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -26,10 +27,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
+import java.util.Arrays;
 
-import android.widget.AdapterView;
 /**
  * Created by ruchirakulkarni on 9/13/14.
  */
@@ -93,18 +92,24 @@ public class TopicFragment extends Fragment{
                              Bundle savedInstanceState) {
 
          View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
+        String[] dummy = new String[] {"1", "2", "3", "4"};
+        postTypeAdapter = new ArrayAdapter<String>(
+                getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, Arrays.asList(dummy));
 
-         //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
+        Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
+
+        //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
 
          Intent intent = getActivity().getIntent();
          if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
              data = data.toLowerCase();
-             postTypeAdapter = new ArrayAdapter<String>(
-                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
+//             postTypeAdapter = new ArrayAdapter<String>(
+//                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
 
              ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
 
+             Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
              listView.setAdapter(postTypeAdapter);
 
              listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
