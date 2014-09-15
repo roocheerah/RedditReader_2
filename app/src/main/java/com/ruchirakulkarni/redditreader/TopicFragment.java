@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * Created by ruchirakulkarni on 9/13/14.
@@ -92,27 +92,20 @@ public class TopicFragment extends Fragment{
                              Bundle savedInstanceState) {
 
          View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
-        String[] dummy = new String[] {"1", "2", "3", "4"};
-        Log.d(LOGG_TAG, "The postAdapter is: ");
-        postTypeAdapter = new ArrayAdapter<String>(
-                getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, Arrays.asList(dummy));
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
-        listView.setAdapter(postTypeAdapter);
-        Log.d(LOGG_TAG, "The postAdapter is: ");
-
+        
         //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
 
          Intent intent = getActivity().getIntent();
          if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
              data = data.toLowerCase();
-//             postTypeAdapter = new ArrayAdapter<String>(
-//                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
+             postTypeAdapter = new ArrayAdapter<String>(
+                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
 
-             //ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+             ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
 
              Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
-//             listView.setAdapter(postTypeAdapter);
+             listView.setAdapter(postTypeAdapter);
 
              listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -254,10 +247,10 @@ public class TopicFragment extends Fragment{
         @Override
         protected void onPostExecute(String[] result) {
             if(result != null){
-                //postTypeAdapter.clear();
+                postTypeAdapter.clear();
                 for(String post : result){
                     Log.d(LOG_TAG, " this post is now being added: " + post);
-//                    postTypeAdapter.add(post);
+                    postTypeAdapter.add(post);
                 }
             }
 
