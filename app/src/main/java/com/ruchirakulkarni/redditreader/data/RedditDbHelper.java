@@ -55,3 +55,4 @@ public class RedditDbHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 }
+
