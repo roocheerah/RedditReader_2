@@ -27,6 +27,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
 import android.widget.AdapterView;
 /**
  * Created by ruchirakulkarni on 9/13/14.
@@ -34,7 +36,9 @@ import android.widget.AdapterView;
 public class TopicFragment extends Fragment{
 
     private ArrayAdapter<String> postTypeAdapter;
+    private String[] posts;
     String data;
+    private final String LOGG_TAG = TopicFragment.class.getSimpleName();
 
     public TopicFragment() {
     }
@@ -61,11 +65,21 @@ public class TopicFragment extends Fragment{
     }
 
     private void updatePosts() {
+        posts = new String[10];
         FetchTopicTask topicTask = new FetchTopicTask();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String topic = prefs.getString(getString(R.string.pref_topic_key),
-                getString(R.string.pref_topic_default));
+        Log.d(LOGG_TAG, "The default topic is " + getString(R.string.pref_topic_default));
+        String topic = prefs.getString(getString(R.string.pref_topic_key), getString(R.string.pref_topic_default));
+        Log.d(LOGG_TAG, "The topic key is:" + getString(R.string.pref_topic_key));
+        Log.d(LOGG_TAG, "The String topic is : " + topic);
         topicTask.execute(topic);
+//        try {
+//            posts = topicTask.get();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -86,11 +100,11 @@ public class TopicFragment extends Fragment{
          if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
              data = data.toLowerCase();
-
              postTypeAdapter = new ArrayAdapter<String>(
                      getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
 
              ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+
              listView.setAdapter(postTypeAdapter);
 
              listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -125,9 +139,11 @@ public class TopicFragment extends Fragment{
             String redditJsonStr = null;
             String topic = params[0];
 
-            if(topic != null){
-                data = topic + "/" + data;
+            if(!topic.equals("")){
+                data = "r/" + topic + "/" + data;
             }
+
+            Log.d(LOG_TAG,"The data is " + data);
 
             try {
             //construct the url for the entry of the reddit API
