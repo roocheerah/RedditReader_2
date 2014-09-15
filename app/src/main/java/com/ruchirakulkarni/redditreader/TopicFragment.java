@@ -93,10 +93,11 @@ public class TopicFragment extends Fragment{
 
          View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
         String[] dummy = new String[] {"1", "2", "3", "4"};
+        Log.d(LOGG_TAG, "The postAdapter is: ");
         postTypeAdapter = new ArrayAdapter<String>(
                 getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, Arrays.asList(dummy));
 
-        Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
+        Log.d(LOGG_TAG, "The postAdapter is: ");
 
         //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
 
@@ -246,7 +247,7 @@ public class TopicFragment extends Fragment{
                 Log.v(LOG_TAG, "Topic Entry " + s);
             }
 
-            return null;
+            return resultStr;
         }
 
         @Override
@@ -254,9 +255,11 @@ public class TopicFragment extends Fragment{
             if(result != null){
                 postTypeAdapter.clear();
                 for(String post : result){
+                    Log.d(LOG_TAG, " this post is now being added: " + post);
                     postTypeAdapter.add(post);
                 }
             }
+
         }
     }
 }
