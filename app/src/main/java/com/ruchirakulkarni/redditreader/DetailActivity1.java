@@ -33,3 +33,4 @@ public class DetailActivity1 extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
