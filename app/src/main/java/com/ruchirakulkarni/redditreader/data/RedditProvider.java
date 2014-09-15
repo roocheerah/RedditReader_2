@@ -12,6 +12,8 @@ import android.net.Uri;
 public class RedditProvider extends ContentProvider {
 
     private static final int REDDIT = 100;
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    private RedditDbHelper mOpenHelper;
 
     private static UriMatcher buildUriMatcher() {
         // I know what you're thinking.  Why create a UriMatcher when you can use regular
@@ -31,7 +33,8 @@ public class RedditProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        return false;
+        mOpenHelper = new RedditDbHelper(getContext());
+        return true;
     }
 
     @Override
@@ -41,7 +44,14 @@ public class RedditProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case REDDIT:
+                return RedditContract.RedditPostEntry.CONTENT_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
     }
 
     @Override
