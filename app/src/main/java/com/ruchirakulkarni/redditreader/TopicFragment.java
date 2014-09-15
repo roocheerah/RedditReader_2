@@ -96,7 +96,8 @@ public class TopicFragment extends Fragment{
         Log.d(LOGG_TAG, "The postAdapter is: ");
         postTypeAdapter = new ArrayAdapter<String>(
                 getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, Arrays.asList(dummy));
-
+        ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+        listView.setAdapter(postTypeAdapter);
         Log.d(LOGG_TAG, "The postAdapter is: ");
 
         //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
@@ -108,10 +109,10 @@ public class TopicFragment extends Fragment{
 //             postTypeAdapter = new ArrayAdapter<String>(
 //                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
 
-             ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+             //ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
 
              Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
-             listView.setAdapter(postTypeAdapter);
+//             listView.setAdapter(postTypeAdapter);
 
              listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -253,10 +254,10 @@ public class TopicFragment extends Fragment{
         @Override
         protected void onPostExecute(String[] result) {
             if(result != null){
-                postTypeAdapter.clear();
+                //postTypeAdapter.clear();
                 for(String post : result){
                     Log.d(LOG_TAG, " this post is now being added: " + post);
-                    postTypeAdapter.add(post);
+//                    postTypeAdapter.add(post);
                 }
             }
 
