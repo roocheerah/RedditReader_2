@@ -1,9 +1,7 @@
 package com.ruchirakulkarni.redditreader;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,24 +14,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
 /**
- * Created by ruchirakulkarni on 9/15/14.
- */
+* Created by ruchirakulkarni on 9/15/14.
+*/
 public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
+    private TopicFragment topicFragment;
     private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
-    private ArrayAdapter<String> postTypeAdapter;
-    private final Context mContext;
-    private String data;
-    private String STRING_URL = TopicFragment.STRING_URL;
 
-    public FetchTopicTask(Context context, ArrayAdapter <String> adapter) {
-       mContext = context;
-       postTypeAdapter = adapter;
-       data = TopicFragment.data;
+    public FetchTopicTask(TopicFragment topicFragment, Void... params){
+        this.topicFragment = topicFragment;
+
     }
-
     @Override
     protected String[] doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
@@ -42,12 +34,16 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
         //This will contain the raw JSON String response as a String
         String redditJsonStr = null;
         String topic = params[0];
-        data = "r/" + topic + "/" + data;
-        Log.d(LOG_TAG, "The data is " + data);
+
+        if(!topic.equals("")){
+            topicFragment.data = "r/" + topic + "/" + topicFragment.data;
+        }
+
+        Log.d(LOG_TAG, "The data is " + topicFragment.data);
 
         try {
             //construct the url for the entry of the reddit API
-            String tempURL = "http://www.reddit.com/" + data + "/.json";
+            String tempURL = "http://www.reddit.com/" + topicFragment.data + "/.json";
             System.out.println(tempURL);
             URL url = new URL(tempURL);
 
@@ -130,7 +126,7 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             String author = data.getString(R_AUTHOR);
             String title = data.getString(R_TITLE);
             String permalink = data.getString(R_PERMALINK);
-            STRING_URL = data.getString(R_URL);
+            topicFragment.STRING_URL = data.getString(R_URL);
             String subreddit = data.getString(R_SUBREDDIT);
 
             resultStr[i] = "Title: " + title + " by " + author;
@@ -147,10 +143,10 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
     @Override
     protected void onPostExecute(String[] result) {
         if(result != null){
-            postTypeAdapter.clear();
+            topicFragment.postTypeAdapter.clear();
             for(String post : result){
 //                    Log.d(LOG_TAG, " this post is now being added: " + post);
-                postTypeAdapter.add(post);
+                topicFragment.postTypeAdapter.add(post);
             }
         }
 
