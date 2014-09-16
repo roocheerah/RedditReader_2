@@ -26,8 +26,8 @@ public class TopicFragment extends Fragment{
 
     private ArrayAdapter<String> postTypeAdapter;
     private String[] posts;
-    public static String data = "all";
-    public static String STRING_URL = "";
+    String data;
+    private String STRING_URL = "";
     private final String LOGG_TAG = TopicFragment.class.getSimpleName();
 
     public TopicFragment() {
@@ -56,7 +56,7 @@ public class TopicFragment extends Fragment{
 
     private void updatePosts() {
         posts = new String[10];
-        FetchTopicTask topicTask = new FetchTopicTask(getActivity(), postTypeAdapter);
+        FetchTopicTask topicTask = new FetchTopicTask(this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 //        Log.d(LOGG_TAG, "The default topic is " + getString(R.string.pref_topic_default));
         String topic = prefs.getString(getString(R.string.pref_topic_key), getString(R.string.pref_topic_default));
@@ -75,39 +75,39 @@ public class TopicFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-         View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
 
         //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
 
-         Intent intent = getActivity().getIntent();
-         if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             data = intent.getStringExtra(Intent.EXTRA_TEXT);
-             data = data.toLowerCase();
-             postTypeAdapter = new ArrayAdapter<String>(
-                     getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
+            data = data.toLowerCase();
+            postTypeAdapter = new ArrayAdapter<String>(
+                    getActivity(), R.layout.list_item_post_textview, R.id.list_item_post_textview, new ArrayList<String>());
 
-             ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
+            ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
 
 //             Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
-             listView.setAdapter(postTypeAdapter);
+            listView.setAdapter(postTypeAdapter);
 
-             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                 @Override
-                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                     String subReddit = postTypeAdapter.getItem(position);
-                     Log.v(LOGG_TAG, "The URL being passed to the web Browser is " + STRING_URL);
-                     String url = STRING_URL;
-                     Intent i = new Intent(Intent.ACTION_VIEW);
-                     i.setData(Uri.parse(url));
-                     startActivity(i);
-                 }
-             });
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                    String subReddit = postTypeAdapter.getItem(position);
+                    Log.v(LOGG_TAG, "The URL being passed to the web Browser is " + STRING_URL);
+                    String url = STRING_URL;
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+            });
 
-             return rootView;
-         }
-         return null;
+            return rootView;
+        }
+        return null;
     }
-}
 
+}
 
