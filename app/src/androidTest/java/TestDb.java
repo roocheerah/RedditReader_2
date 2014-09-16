@@ -1,11 +1,14 @@
+package com.ruchirakulkarni.redditreader;
+
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import com.ruchirakulkarni.redditreader.data.RedditContract;
 import com.ruchirakulkarni.redditreader.data.RedditDbHelper;
-import android.database.sqlite.*;
-import android.util.Log;
+
 import java.util.Map;
 import java.util.Set;
 
