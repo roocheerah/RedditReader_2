@@ -7,16 +7,36 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.ruchirakulkarni.redditreader.data.RedditContract;
-import com.ruchirakulkarni.redditreader.data.RedditDbHelper;
 
 /**
  * Created by ruchirakulkarni on 9/15/14.
  */
 public class TestProvider extends AndroidTestCase {
-    public static final String LOG_TAG = TestDb.class.getSimpleName();
+    public static final String LOG_TAG = TestProvider.class.getSimpleName();
 
-    public void testDeleteDb() throws Throwable {
-        mContext.deleteDatabase(RedditDbHelper.DATABASE_NAME);
+    public void deleteAllRecords() {
+
+        mContext.getContentResolver().delete(
+            RedditContract.RedditPostEntry.CONTENT_URI,
+            null,
+            null
+        );
+
+        Cursor cursor = mContext.getContentResolver().query(
+                RedditContract.RedditPostEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals(0, cursor.getCount());
+        cursor.close();
+    }
+
+    // Since we want each test to start with a clean slate, run deleteAllRecords
+    // in setUp (called by the test runner before each test).
+    public void setUp() {
+        deleteAllRecords();
     }
 
     public void testInsertReadProvider(){
