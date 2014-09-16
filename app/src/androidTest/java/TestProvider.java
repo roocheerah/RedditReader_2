@@ -33,6 +33,41 @@ public class TestProvider extends AndroidTestCase {
         cursor.close();
     }
 
+//    public void testUpdatePosts() {
+//        // Create a new map of values, where column names are the keys
+//        ContentValues values = TestDb.getContentValues();
+//
+//        Uri redditUri = mContext.getContentResolver().
+//                insert(RedditContract.RedditPostEntry.CONTENT_URI, values);
+//        long redditRowId = ContentUris.parseId(redditUri);
+//
+//        // Verify we got a row back.
+//        assertTrue(redditRowId != -1);
+//        Log.d(LOG_TAG, "New row id: " + redditRowId);
+//
+//        ContentValues updatedValues = new ContentValues(values);
+//        updatedValues.put(RedditContract.RedditPostEntry._ID, redditRowId);
+//        updatedValues.put(RedditContract.RedditPostEntry.COL_TITLE, "Santa's Village");
+//
+//        int count = mContext.getContentResolver().update(
+//                RedditContract.RedditPostEntry.CONTENT_URI, updatedValues, RedditContract.RedditPostEntry._ID + "= ?",
+//                new String[] { Long.toString(redditRowId)});
+//
+//        assertEquals(count, 1);
+//
+//        // A cursor is your primary interface to the query results.
+//        Cursor cursor = mContext.getContentResolver().query(
+//                RedditContract.RedditPostEntry.buildRedditUri(redditRowId),
+//                null,
+//                null, // Columns for the "where" clause
+//                null, // Values for the "where" clause
+//                null // sort order
+//        );
+//
+//        TestDb.validateCursor(cursor, updatedValues);
+//    }
+
+
     // Since we want each test to start with a clean slate, run deleteAllRecords
     // in setUp (called by the test runner before each test).
     public void setUp() {
