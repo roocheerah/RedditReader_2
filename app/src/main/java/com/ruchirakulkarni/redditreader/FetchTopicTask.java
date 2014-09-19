@@ -1,10 +1,14 @@
 package com.ruchirakulkarni.redditreader;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-
+import com.ruchirakulkarni.redditreader.data.RedditContract;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +31,8 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
     private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
 
-    public FetchTopicTask(Context context, ArrayAdapter<String> adapter){
-       // this.topicFragment = topicFragment;
+    public FetchTopicTask(Context context, ArrayAdapter<String> adapter, TopicFragment topicFragment){
+        this.topicFragment = topicFragment;
         mContext = context;
         postTypeAdapter = adapter;
 
@@ -133,18 +137,54 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             String author = data.getString(R_AUTHOR);
             String title = data.getString(R_TITLE);
             String permalink = data.getString(R_PERMALINK);
-            TopicFragment.STRING_URL = data.getString(R_URL);
+            topicFragment.STRING_URL = data.getString(R_URL);
             String subreddit = data.getString(R_SUBREDDIT);
 
             resultStr[i] = "Title: " + title + " by " + author;
 
         }
 
+            for (String s : resultStr){
+                Log.v(LOG_TAG, "Topic Entry " + s);
+            }
 //            for (String s : resultStr){
 //                Log.v(LOG_TAG, "Topic Entry " + s);
 //            }
 
+
         return resultStr;
+    }
+
+
+    private void addPost(String topicSetting, String title, String author, int comments, int score) {
+
+        Log.v(LOG_TAG, "inserting post " + title + " by " + author + " has comments = "+ comments + " and score of " + score);
+
+        // First, check if the location with this city name exists in the db
+        Cursor cursor = mContext.getContentResolver().query(
+                RedditContract.RedditPostEntry.CONTENT_URI,
+                new String[]{RedditContract.RedditPostEntry._ID},
+                RedditContract.RedditPostEntry.COL_TITLE + " = ?",
+                new String[]{},
+                null);
+
+        if (cursor.moveToFirst()) {
+            Log.v(LOG_TAG, "Found it in the database!");
+            int locationIdIndex = cursor.getColumnIndex(RedditContract.RedditPostEntry._ID);
+//            return cursor.getLong(locationIdIndex);
+        } else {
+            Log.v(LOG_TAG, "Didn't find it in the database, inserting now!");
+            ContentValues locationValues = new ContentValues();
+//            locationValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+//            locationValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
+//            locationValues.put(LocationEntry.COLUMN_COORD_LAT, lat);
+//            locationValues.put(LocationEntry.COLUMN_COORD_LONG, lon);
+
+//            Uri locationInsertUri = mContext.getContentResolver()
+//                    .insert(LocationEntry.CONTENT_URI, locationValues);
+
+//            return ContentUris.parseId(locationInsertUri);
+        }
     }
 
     @Override
