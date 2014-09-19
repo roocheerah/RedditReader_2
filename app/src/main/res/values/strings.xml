@@ -114,4 +114,9 @@
     <string name="pref_topics_values_writingprompts">writingprompts</string>
     <string name="title_activity_detail_activity2">Post</string>
 
+
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">redditreader.ruchirakulkarni.com</string>
+    <string name="content_authority">"com.ruchirakulkarni.redditreader"</string>
+
 </resources>
