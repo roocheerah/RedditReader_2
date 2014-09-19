@@ -56,7 +56,7 @@ public class TopicFragment extends Fragment{
 
     private void updatePosts() {
         posts = new String[10];
-        FetchTopicTask topicTask = new FetchTopicTask(getActivity(), postTypeAdapter);
+        FetchTopicTask topicTask = new FetchTopicTask(getActivity(), postTypeAdapter, this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 //        Log.d(LOGG_TAG, "The default topic is " + getString(R.string.pref_topic_default));
         String topic = prefs.getString(getString(R.string.pref_topic_key), getString(R.string.pref_topic_default));
@@ -110,4 +110,3 @@ public class TopicFragment extends Fragment{
     }
 
 }
-
