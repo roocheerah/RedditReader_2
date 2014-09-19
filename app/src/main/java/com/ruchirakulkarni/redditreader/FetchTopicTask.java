@@ -1,14 +1,17 @@
 package com.ruchirakulkarni.redditreader;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-
-import android.content.Context;
+import android.database.DatabaseUtils;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
 import com.ruchirakulkarni.redditreader.data.RedditContract;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,12 +22,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Vector;
 
 /**
 * Created by ruchirakulkarni on 9/15/14.
 */
 public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
+    private static final boolean DEBUG = true ;
     private ArrayAdapter<String> postTypeAdapter;
     private TopicFragment topicFragment;
     private final Context mContext;
@@ -37,6 +42,8 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
         postTypeAdapter = adapter;
 
     }
+
+
     @Override
     protected String[] doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
@@ -114,6 +121,7 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private String[] getSubRedditDataFromJSON(String redditJsonStr) throws JSONException{
 
         //these are the names of the JSON objects that need to be extracted
@@ -124,14 +132,20 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
         final String R_SUBREDDIT = "subreddit";
         final String R_DATA = "data";
         final String R_CHILDREN = "children";
+        final String R_COMMENT = "num_comments";
+        final String R_SCORE = "score";
 
         String[] resultStr = new String[10];
+        Vector<ContentValues> cVVector = new Vector<ContentValues>(10);
 
         JSONObject redditJson = new JSONObject(redditJsonStr);
         JSONObject dataObject = redditJson.getJSONObject(R_DATA);
         JSONArray children = dataObject.getJSONArray(R_CHILDREN);
 
         for (int i = 0; i < 10 ; i++) {
+
+            ContentValues postValues = new ContentValues();
+
             JSONObject dummy = children.getJSONObject(i);
             JSONObject data = dummy.getJSONObject(R_DATA);
             String author = data.getString(R_AUTHOR);
@@ -139,59 +153,62 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             String permalink = data.getString(R_PERMALINK);
             topicFragment.STRING_URL = data.getString(R_URL);
             String subreddit = data.getString(R_SUBREDDIT);
+            int comments = data.getInt(R_COMMENT);
+            int score = data.getInt(R_SCORE);
+
+
+            postValues.put(RedditContract.RedditPostEntry.COL_TITLE, title);
+            postValues.put(RedditContract.RedditPostEntry.COL_AUTHOR, author);
+            postValues.put(RedditContract.RedditPostEntry.COL_COMMENTS, comments );
+            postValues.put(RedditContract.RedditPostEntry.COL_PERMALINK, permalink);
+            postValues.put(RedditContract.RedditPostEntry.COL_SCORE, score);
+            postValues.put(RedditContract.RedditPostEntry.COL_SUBREDDIT_TYPE, subreddit);
+            postValues.put(RedditContract.RedditPostEntry.COL_URL, topicFragment.STRING_URL);
+
+            cVVector.add(postValues);
 
             resultStr[i] = "Title: " + title + " by " + author;
-
         }
 
-            for (String s : resultStr){
-                Log.v(LOG_TAG, "Topic Entry " + s);
+        if (cVVector.size() > 0) {
+            ContentValues[] cvArray = new ContentValues[cVVector.size()];
+            cVVector.toArray(cvArray);
+            int rowsInserted = mContext.getContentResolver()
+                    .bulkInsert(RedditContract.RedditPostEntry.CONTENT_URI, cvArray);
+            Log.v(LOG_TAG, "inserted " + rowsInserted + " rows of weather data");
+            // Use a DEBUG variable to gate whether or not you do this, so you can easily
+            // turn it on and off, and so that it's easy to see what you can rip out if
+            // you ever want to remove it.
+            if (DEBUG) {
+                Cursor weatherCursor = mContext.getContentResolver().query(
+                        RedditContract.RedditPostEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+                if (weatherCursor.moveToFirst()) {
+                    ContentValues resultValues = new ContentValues();
+                    DatabaseUtils.cursorRowToContentValues(weatherCursor, resultValues);
+                    Log.v(LOG_TAG, "Query succeeded! **********");
+                    for (String key : resultValues.keySet()) {
+                        Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
+                    }
+                } else {
+                    Log.v(LOG_TAG, "Query failed! :( **********");
+                }
             }
-//            for (String s : resultStr){
-//                Log.v(LOG_TAG, "Topic Entry " + s);
-//            }
-
-
+        }
         return resultStr;
     }
 
 
-    private void addPost(String topicSetting, String title, String author, int comments, int score) {
-
-        Log.v(LOG_TAG, "inserting post " + title + " by " + author + " has comments = "+ comments + " and score of " + score);
-
-        // First, check if the location with this city name exists in the db
-        Cursor cursor = mContext.getContentResolver().query(
-                RedditContract.RedditPostEntry.CONTENT_URI,
-                new String[]{RedditContract.RedditPostEntry._ID},
-                RedditContract.RedditPostEntry.COL_TITLE + " = ?",
-                new String[]{},
-                null);
-
-        if (cursor.moveToFirst()) {
-            Log.v(LOG_TAG, "Found it in the database!");
-            int locationIdIndex = cursor.getColumnIndex(RedditContract.RedditPostEntry._ID);
-//            return cursor.getLong(locationIdIndex);
-        } else {
-            Log.v(LOG_TAG, "Didn't find it in the database, inserting now!");
-            ContentValues locationValues = new ContentValues();
-//            locationValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
-//            locationValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
-//            locationValues.put(LocationEntry.COLUMN_COORD_LAT, lat);
-//            locationValues.put(LocationEntry.COLUMN_COORD_LONG, lon);
-
-//            Uri locationInsertUri = mContext.getContentResolver()
-//                    .insert(LocationEntry.CONTENT_URI, locationValues);
-
-//            return ContentUris.parseId(locationInsertUri);
-        }
-    }
-
     @Override
-    protected void onPostExecute(String[] result) {
-        if(result != null){
+    protected void onPostExecute(String[] resultStr) {
+        if(resultStr != null){
             postTypeAdapter.clear();
-            for(String post : result){
+            for(String post : resultStr){
 //                    Log.d(LOG_TAG, " this post is now being added: " + post);
                 postTypeAdapter.add(post);
             }
