@@ -25,7 +25,6 @@ import java.util.ArrayList;
 public class TopicFragment extends Fragment{
 
     public static String STRING_URL = "";
-    private String[] posts;
     String data;
     private final String LOGG_TAG = TopicFragment.class.getSimpleName();
     private ArrayAdapter<String> postTypeAdapter;
@@ -55,14 +54,8 @@ public class TopicFragment extends Fragment{
     }
 
     private void updatePosts() {
-        posts = new String[10];
-        FetchTopicTask topicTask = new FetchTopicTask(getActivity(), postTypeAdapter, this);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-//        Log.d(LOGG_TAG, "The default topic is " + getString(R.string.pref_topic_default));
-        String topic = prefs.getString(getString(R.string.pref_topic_key), getString(R.string.pref_topic_default));
-//        Log.d(LOGG_TAG, "The topic key is:" + getString(R.string.pref_topic_key));
-//        Log.d(LOGG_TAG, "The String topic is : " + topic);
-        topicTask.execute(topic);
+        String topic = Utility.getPreferredTopic(getActivity());
+        new FetchTopicTask(getActivity(), postTypeAdapter, this).execute(topic);
     }
 
     @Override
