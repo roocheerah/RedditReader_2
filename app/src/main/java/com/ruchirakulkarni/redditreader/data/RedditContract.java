@@ -52,7 +52,7 @@ public class RedditContract {
 
         public static final String COL_SCORE = "score";
 
-        public static Uri buildRedditUri(long id) {
+        public static Uri buildRedditUri(String topic, long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
