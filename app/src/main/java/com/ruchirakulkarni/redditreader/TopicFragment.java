@@ -1,207 +1,205 @@
 package com.ruchirakulkarni.redditreader;
 
-import android.content.Intent;
+import android.annotation.TargetApi;
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
+import android.database.DatabaseUtils;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.ruchirakulkarni.redditreader.data.RedditContract;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Vector;
+
 /**
- * Created by ruchirakulkarni on 9/13/14.
- */
-public class TopicFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+* Created by ruchirakulkarni on 9/15/14.
+*/
+public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
-    public static String STRING_URL = "";
-    String data;
-    private final String LOGG_TAG = TopicFragment.class.getSimpleName();
-    private SimpleCursorAdapter postTypeAdapter;
-    private static final int POST_LOADER = 0;
-    private String mTopic;
+    private static final boolean DEBUG = true ;
+    private TopicFragment topicFragment;
+    private final Context mContext;
 
+    private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
 
-    private static final String[] POST_COLUMNS = {
-            // In this case the id needs to be fully qualified with a table name, since
-            // the content provider joins the location & weather tables in the background
-            // (both have an _id column)
-            // On the one hand, that's annoying.  On the other, you can search the reddit table
+    public FetchTopicTask(Context context, TopicFragment topicFragment){
+        this.topicFragment = topicFragment;
+        mContext = context;
 
-            RedditContract.RedditPostEntry.TABLE_NAME + "." + RedditContract.RedditPostEntry._ID,
-            RedditContract.RedditPostEntry.COL_TITLE,
-            RedditContract.RedditPostEntry.COL_AUTHOR,
-            RedditContract.RedditPostEntry.COL_SUBREDDIT_TYPE,
-            RedditContract.RedditPostEntry.COL_COMMENTS,
-            RedditContract.RedditPostEntry.COL_PERMALINK,
-            RedditContract.RedditPostEntry.COL_URL,
-            RedditContract.RedditPostEntry.COL_SCORE
-    };
-
-    public static final int COLUMN_ID = 0;
-    public static final int COLUMN_TITLE = 1;
-    public static final int COLUMN_AUTHOR = 2;
-    public static final int COLUMN_SUBREDTYPE = 3;
-    public static final int COLUMN_COMMENTS = 4;
-    public static final int COLUMN_PERMALINK = 5;
-    public static final int COLUMN_URL = 6;
-    public static final int COLUMN_SCORE = 7;
-
-
-    public TopicFragment() {
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.detail_activity1, menu);
-    }
+    protected String[] doInBackground(String... params) {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_refresh) {
-            updatePosts();
-            return true;
+        //This will contain the raw JSON String response as a String
+        String redditJsonStr = null;
+        String topic = params[0];
+
+        if(!topic.equals("")){
+            //NEED TO DEBUG HERE BECAUSE THE URL RETURNED IS NOT CORRECT...
+            topicFragment.data = "r/" + topic + "/" + topicFragment.data;
         }
-        return super.onOptionsItemSelected(item);
-    }
 
-    private void updatePosts() {
-        String topic = Utility.getPreferredTopic(getActivity());
-        new FetchTopicTask(getActivity(), this).execute(topic);
-    }
+        Log.d(LOG_TAG, "The data is " + topicFragment.data);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        updatePosts();
-    }
+        try {
+            //construct the url for the entry of the reddit API
+            String tempURL = "http://www.reddit.com/" + topicFragment.data + "/.json";
+            System.out.println(tempURL);
+            URL url = new URL(tempURL);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            // Create the request to Reddit API, and open the connection
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
 
-        //NOW WE NEED TO RECEIVE THE INTENT FROM THE MAINACTIVITY
+            // Read the input stream into a String
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                // Nothing to do.
+                redditJsonStr = null;
+            }
+            reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        Intent intent = getActivity().getIntent();
-        Log.d("The data right now is: ", data);
-        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            data = intent.getStringExtra(Intent.EXTRA_TEXT);
-            data = data.toLowerCase();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                // But it does make debugging a *lot* easier if you print out the completed
+                // buffer for debugging.
+                buffer.append(line + "\n");
+            }
 
-            new SimpleCursorAdapter(
-                    getActivity(),
-                    R.layout.list_item_post_textview,
-                    null,
-                    // the column names to use to fill the textviews
-                    new String[]{RedditContract.RedditPostEntry.COL_TITLE,
-                            RedditContract.RedditPostEntry.COL_AUTHOR,
-                            RedditContract.RedditPostEntry.COL_SCORE,
-                    },
-                    // the textviews to fill with the data pulled from the columns above
-                    new int[]{R.id.list_item_post_textview,
-                            R.id.list_item_post_textview,
-                            R.id.list_item_post_textview,
-                            R.id.list_item_post_textview
-                    },
-                    0
-            );
+            if (buffer.length() == 0) {
+                // Stream was empty.  No point in parsing.
+                redditJsonStr = null;
+            }
 
-            postTypeAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                @Override
-                public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                    switch (columnIndex) {
-                        case COLUMN_TITLE:
-                        case COLUMN_AUTHOR: {}
-                        case COLUMN_SCORE:{}
-                        case COLUMN_COMMENTS:{}
-                            return true;
-                        }
-                    return false;
+            redditJsonStr = buffer.toString();
+            Log.v(LOG_TAG, "Topic JSON String " + redditJsonStr);
+        } catch (IOException e) {
+            Log.e("PlaceholderFragment", "Error ", e);
+            // If the code didn't successfully get the weather data, there's no point in attemping
+            // to parse it.
+            redditJsonStr = null;
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e("PlaceholderFragment", "Error closing stream", e);
                 }
-            });
+            }
 
-            View rootView = inflater.inflate(R.layout.fragment_detail_activity1, container, false);
-
-            ListView listView = (ListView) rootView.findViewById(R.id.listview_detailactivity1);
-
-//             Log.d(LOGG_TAG, "The postAdapter is: " + postTypeAdapter.toString());
-            listView.setAdapter(postTypeAdapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                    //String subReddit = postTypeAdapter.getItem(position);
-                    Log.v(LOGG_TAG, "The URL being passed to the web Browser is " + STRING_URL);
-                    String url = STRING_URL;
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse(url));
-                    startActivity(i);
-                }
-            });
-
-            return rootView;
+            try {
+                return getSubRedditDataFromJSON(redditJsonStr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+            return null;
         }
-        return null;
     }
 
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        // This is called when a new Loader needs to be created.  This
-        // fragment only uses one loader, so we don't care about checking the id.
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private String[] getSubRedditDataFromJSON(String redditJsonStr) throws JSONException{
 
-        // Sort order:  Ascending, by score.
-        String sortOrder = RedditContract.RedditPostEntry.COL_SCORE + " ASC";
+        //these are the names of the JSON objects that need to be extracted
+        final String R_AUTHOR = "author";
+        final String R_TITLE = "title";
+        final String R_PERMALINK = "permalink"; //the links to the comments on that article
+        final String R_URL = "url";
+        final String R_SUBREDDIT = "subreddit";
+        final String R_DATA = "data";
+        final String R_CHILDREN = "children";
+        final String R_COMMENT = "num_comments";
+        final String R_SCORE = "score";
 
-        mTopic = Utility.getPreferredTopic(getActivity());
-        Uri postForTopicUri = RedditContract.RedditPostEntry.buildRedditUri(
-                mTopic, id);
+        String[] resultStr = new String[10];
+        Vector<ContentValues> cVVector = new Vector<ContentValues>(10);
 
-        // Now create and return a CursorLoader that will take care of
-        // creating a Cursor for the data being displayed.
-        return new CursorLoader(
-                getActivity(),
-                postForTopicUri,
-                POST_COLUMNS,
-                null,
-                null,
-                sortOrder
-        );
-    }
+        JSONObject redditJson = new JSONObject(redditJsonStr);
+        JSONObject dataObject = redditJson.getJSONObject(R_DATA);
+        JSONArray children = dataObject.getJSONArray(R_CHILDREN);
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
-        postTypeAdapter.swapCursor(data);
-    }
+        for (int i = 0; i < 10 ; i++) {
 
-    @Override
-    public void onLoaderReset(Loader loader) {
-        postTypeAdapter.swapCursor(null);
+            ContentValues postValues = new ContentValues();
 
-    }
+            JSONObject dummy = children.getJSONObject(i);
+            JSONObject data = dummy.getJSONObject(R_DATA);
+            String author = data.getString(R_AUTHOR);
+            String title = data.getString(R_TITLE);
+            String permalink = data.getString(R_PERMALINK);
+            topicFragment.STRING_URL = data.getString(R_URL);
+            String subreddit = data.getString(R_SUBREDDIT);
+            int comments = data.getInt(R_COMMENT);
+            int score = data.getInt(R_SCORE);
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(POST_LOADER, null, this);
-        super.onActivityCreated(savedInstanceState);
+
+            postValues.put(RedditContract.RedditPostEntry.COL_TITLE, title);
+            postValues.put(RedditContract.RedditPostEntry.COL_AUTHOR, author);
+            postValues.put(RedditContract.RedditPostEntry.COL_COMMENTS, comments );
+            postValues.put(RedditContract.RedditPostEntry.COL_PERMALINK, permalink);
+            postValues.put(RedditContract.RedditPostEntry.COL_SCORE, score);
+            postValues.put(RedditContract.RedditPostEntry.COL_SUBREDDIT_TYPE, subreddit);
+            postValues.put(RedditContract.RedditPostEntry.COL_URL, topicFragment.STRING_URL);
+
+            cVVector.add(postValues);
+
+            resultStr[i] = "Title: " + title + " by " + author;
+        }
+
+        if (cVVector.size() > 0) {
+            ContentValues[] cvArray = new ContentValues[cVVector.size()];
+            cVVector.toArray(cvArray);
+            int rowsInserted = mContext.getContentResolver()
+                    .bulkInsert(RedditContract.RedditPostEntry.CONTENT_URI, cvArray);
+            Log.v(LOG_TAG, "inserted " + rowsInserted + " rows of weather data");
+            // Use a DEBUG variable to gate whether or not you do this, so you can easily
+            // turn it on and off, and so that it's easy to see what you can rip out if
+            // you ever want to remove it.
+            if (DEBUG) {
+                Cursor redditCursor = mContext.getContentResolver().query(
+                        RedditContract.RedditPostEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+                Log.d("redditCursor has the value of", redditCursor.toString());
+
+                if (redditCursor.moveToFirst()) {
+                    ContentValues resultValues = new ContentValues();
+                    DatabaseUtils.cursorRowToContentValues(redditCursor, resultValues);
+                    Log.v(LOG_TAG, "Query succeeded! **********");
+                    for (String key : resultValues.keySet()) {
+                        Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
+                    }
+                } else {
+                    Log.v(LOG_TAG, "Query failed! :( **********");
+                }
+            }
+        }
+        return resultStr;
     }
 }
