@@ -8,7 +8,6 @@ import android.database.DatabaseUtils;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.ruchirakulkarni.redditreader.data.RedditContract;
 
@@ -30,16 +29,14 @@ import java.util.Vector;
 public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
     private static final boolean DEBUG = true ;
-    private ArrayAdapter<String> postTypeAdapter;
     private TopicFragment topicFragment;
     private final Context mContext;
 
     private final String LOG_TAG = FetchTopicTask.class.getSimpleName();
 
-    public FetchTopicTask(Context context, ArrayAdapter<String> adapter, TopicFragment topicFragment){
+    public FetchTopicTask(Context context, TopicFragment topicFragment){
         this.topicFragment = topicFragment;
         mContext = context;
-        postTypeAdapter = adapter;
 
     }
 
@@ -54,6 +51,7 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
         String topic = params[0];
 
         if(!topic.equals("")){
+            //NEED TO DEBUG HERE BECAUSE THE URL RETURNED IS NOT CORRECT...
             topicFragment.data = "r/" + topic + "/" + topicFragment.data;
         }
 
@@ -180,7 +178,7 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             // turn it on and off, and so that it's easy to see what you can rip out if
             // you ever want to remove it.
             if (DEBUG) {
-                Cursor weatherCursor = mContext.getContentResolver().query(
+                Cursor redditCursor = mContext.getContentResolver().query(
                         RedditContract.RedditPostEntry.CONTENT_URI,
                         null,
                         null,
@@ -188,9 +186,11 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
                         null
                 );
 
-                if (weatherCursor.moveToFirst()) {
+                Log.d("redditCursor has the value of", redditCursor.toString());
+
+                if (redditCursor.moveToFirst()) {
                     ContentValues resultValues = new ContentValues();
-                    DatabaseUtils.cursorRowToContentValues(weatherCursor, resultValues);
+                    DatabaseUtils.cursorRowToContentValues(redditCursor, resultValues);
                     Log.v(LOG_TAG, "Query succeeded! **********");
                     for (String key : resultValues.keySet()) {
                         Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
@@ -201,18 +201,5 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             }
         }
         return resultStr;
-    }
-
-
-    @Override
-    protected void onPostExecute(String[] resultStr) {
-        if(resultStr != null){
-            postTypeAdapter.clear();
-            for(String post : resultStr){
-//                    Log.d(LOG_TAG, " this post is now being added: " + post);
-                postTypeAdapter.add(post);
-            }
-        }
-
     }
 }
