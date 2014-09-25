@@ -3,8 +3,6 @@ package com.ruchirakulkarni.redditreader;
 import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -177,28 +175,28 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             // Use a DEBUG variable to gate whether or not you do this, so you can easily
             // turn it on and off, and so that it's easy to see what you can rip out if
             // you ever want to remove it.
-            if (DEBUG) {
-                Cursor redditCursor = mContext.getContentResolver().query(
-                        RedditContract.RedditPostEntry.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null
-                );
-
-                Log.d("redditCursor has the value of", redditCursor.toString());
-
-                if (redditCursor.moveToFirst()) {
-                    ContentValues resultValues = new ContentValues();
-                    DatabaseUtils.cursorRowToContentValues(redditCursor, resultValues);
-                    Log.v(LOG_TAG, "Query succeeded! **********");
-                    for (String key : resultValues.keySet()) {
-                        Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
-                    }
-                } else {
-                    Log.v(LOG_TAG, "Query failed! :( **********");
-                }
-            }
+//            if (DEBUG) {
+//                Cursor redditCursor = mContext.getContentResolver().query(
+//                        RedditContract.RedditPostEntry.CONTENT_URI,
+//                        null,
+//                        null,
+//                        null,
+//                        null
+//                );
+//
+//                Log.d("redditCursor has the value of", redditCursor.toString());
+//
+//                if (redditCursor.moveToFirst()) {
+//                    ContentValues resultValues = new ContentValues();
+//                    DatabaseUtils.cursorRowToContentValues(redditCursor, resultValues);
+//                    Log.v(LOG_TAG, "Query succeeded! **********");
+//                    for (String key : resultValues.keySet()) {
+//                        Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
+//                    }
+//                } else {
+//                    Log.v(LOG_TAG, "Query failed! :( **********");
+//                }
+//            }
         }
         return resultStr;
     }
