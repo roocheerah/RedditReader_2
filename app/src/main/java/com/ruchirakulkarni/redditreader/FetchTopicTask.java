@@ -171,6 +171,9 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
             cVVector.toArray(cvArray);
             int rowsInserted = mContext.getContentResolver()
                     .bulkInsert(RedditContract.RedditPostEntry.CONTENT_URI, cvArray);
+            for (ContentValues s : cvArray) {
+                Log.v(LOG_TAG, "The rows inserted are : " + s.toString());
+            }
             Log.v(LOG_TAG, "inserted " + rowsInserted + " rows of weather data");
             // Use a DEBUG variable to gate whether or not you do this, so you can easily
             // turn it on and off, and so that it's easy to see what you can rip out if
