@@ -156,7 +156,8 @@ public class TopicFragment extends Fragment implements LoaderManager.LoaderCallb
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                     //String subReddit = postTypeAdapter.getItem(position);
-                    Cursor cursor = postTypeAdapter.getCursor();
+                    SimpleCursorAdapter adapter = (SimpleCursorAdapter) adapterView.getAdapter();
+                    Cursor cursor = adapter.getCursor();
                     if (cursor != null && cursor.moveToPosition(position)) {
                         Log.v(LOGG_TAG, "The URL being passed to the web Browser is " + STRING_URL);
                         String url = STRING_URL;
