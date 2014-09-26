@@ -38,7 +38,6 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
 
     }
 
-
     @Override
     protected String[] doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
@@ -175,31 +174,7 @@ public class FetchTopicTask extends AsyncTask<String, Void, String[]> {
                 Log.v(LOG_TAG, "The rows inserted are : " + s.toString());
             }
             Log.v(LOG_TAG, "inserted " + rowsInserted + " rows of weather data");
-            // Use a DEBUG variable to gate whether or not you do this, so you can easily
-            // turn it on and off, and so that it's easy to see what you can rip out if
-            // you ever want to remove it.
-//            if (DEBUG) {
-//                Cursor redditCursor = mContext.getContentResolver().query(
-//                        RedditContract.RedditPostEntry.CONTENT_URI,
-//                        null,
-//                        null,
-//                        null,
-//                        null
-//                );
-//
-//                Log.d("redditCursor has the value of", redditCursor.toString());
-//
-//                if (redditCursor.moveToFirst()) {
-//                    ContentValues resultValues = new ContentValues();
-//                    DatabaseUtils.cursorRowToContentValues(redditCursor, resultValues);
-//                    Log.v(LOG_TAG, "Query succeeded! **********");
-//                    for (String key : resultValues.keySet()) {
-//                        Log.v(LOG_TAG, key + ": " + resultValues.getAsString(key));
-//                    }
-//                } else {
-//                    Log.v(LOG_TAG, "Query failed! :( **********");
-//                }
-//            }
+
         }
         return resultStr;
     }
