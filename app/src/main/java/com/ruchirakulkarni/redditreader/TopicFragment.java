@@ -93,7 +93,6 @@ public class TopicFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onStart() {
         super.onStart();
-        updatePosts();
     }
 
     @Override
@@ -111,18 +110,18 @@ public class TopicFragment extends Fragment implements LoaderManager.LoaderCallb
             postTypeAdapter = new SimpleCursorAdapter(
                     getActivity(),
                     R.layout.list_item_post_textview,
-                    null,
-                    // the column names to use to fill the textviews
+                   null,
+                    //the column names to use to fill the textviews
                     new String[]{RedditContract.RedditPostEntry.COL_TITLE,
                             RedditContract.RedditPostEntry.COL_AUTHOR,
                             RedditContract.RedditPostEntry.COL_SCORE,
                     },
                     // the textviews to fill with the data pulled from the columns above
                     new int[]{R.id.list_item_post_textview,
-                            R.id.list_item_post_textview,
-                            R.id.list_item_post_textview,
-                            R.id.list_item_post_textview
+                            R.id.list_item_author_textview,
+                            R.id.list_item_score_textview,
                     },
+
                     0
             );
 
@@ -212,5 +211,13 @@ public class TopicFragment extends Fragment implements LoaderManager.LoaderCallb
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(POST_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mTopic != null && !mTopic.equals(Utility.getPreferredTopic(getActivity()))) {
+            getLoaderManager().restartLoader(POST_LOADER, null, this);
+        }
     }
 }
