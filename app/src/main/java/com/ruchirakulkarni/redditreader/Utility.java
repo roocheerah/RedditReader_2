@@ -13,4 +13,8 @@ public class Utility {
         return prefs.getString(context.getString(R.string.pref_topic_key),
                 context.getString(R.string.pref_topic_default));
     }
+
+    static String formatPost(String post){
+        return post + " ";
+    }
 }
